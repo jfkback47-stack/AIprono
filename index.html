@@ -15,7 +15,7 @@ header{padding:22px 17px;background:#0b251b;border-bottom:1px solid var(--line)}
 header p{color:var(--muted);font-size:13px;margin-bottom:0}
 main{max-width:720px;margin:auto;padding:16px}
 h2{font-size:18px;margin-top:8px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
 .stat,.panel,.match{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:13px}
 .stat strong{display:block;color:var(--green);font-size:22px}
 .stat span{font-size:11px;color:var(--muted)}
@@ -45,9 +45,28 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
 <main>
   <h2>📊 Mon tableau de bord</h2>
   <div class="stats">
-    <div class="stat"><strong id="total">0</strong><span>Matchs ajoutés</span></div>
-    <div class="stat"><strong id="played">0</strong><span>Résultats saisis</span></div>
-    <div class="stat"><strong id="rate">—</strong><span>Pronostics réussis</span></div>
+    <div class="stats">
+  <div class="stat">
+    <strong id="total">0</strong>
+    <span>Matchs analysés</span>
+  </div>
+  <div class="stat">
+    <strong id="played">0</strong>
+    <span>Pronostics évalués</span>
+  </div>
+  <div class="stat">
+    <strong id="wins">0</strong>
+    <span>Réussis</span>
+  </div>
+  <div class="stat">
+    <strong id="losses">0</strong>
+    <span>Échoués</span>
+  </div>
+  <div class="stat">
+    <strong id="rate">—</strong>
+    <span>Taux de réussite</span>
+  </div>
+    </div>
   </div>
 
   <section class="panel">
@@ -91,10 +110,17 @@ const $=id=>document.getElementById(id);
 function save(){try{localStorage.setItem(key,JSON.stringify(matches))}catch(e){alert("Impossible de sauvegarder sur ce navigateur.")}render()}
 function render(){
  $("total").textContent=matches.length;
- const done=matches.filter(m=>m.result);
- $("played").textContent=done.length;
- const correct=done.filter(m=>m.result==="Réussi").length;
- $("rate").textContent=done.length?Math.round(correct/done.length*100)+"%":"—";
+
+const done=matches.filter(m=>m.result==="Réussi"||m.result==="Échoué");
+const correct=done.filter(m=>m.result==="Réussi").length;
+const failed=done.filter(m=>m.result==="Échoué").length;
+
+$("played").textContent=done.length;
+$("wins").textContent=correct;
+$("losses").textContent=failed;
+$("rate").textContent=done.length
+  ?Math.round(correct/done.length*100)+"%"
+  :"—";
  const list=$("matches");
  if(!matches.length){list.innerHTML='<p class="empty">Aucun match pour le moment. Ajoute ton premier match ci-dessus.</p>';return}
  list.innerHTML="";
