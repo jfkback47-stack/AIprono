@@ -1,150 +1,312 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#071c16">
-<title>AIprono — Football & Statistiques</title>
+<meta name="theme-color" content="#071b16">
+<title>AIprono — Tableau de bord</title>
 <style>
-:root{--bg:#071c16;--panel:#102820;--green:#35dc91;--muted:#9bb7aa;--line:#284438}
+:root{--bg:#071b16;--panel:#102820;--panel2:#15352a;--line:#285344;--text:#f1f7f3;--muted:#a7c0b4;--green:#55df9b;--red:#ff7d7d;--gold:#f6d477}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:#f4fff8;font-family:Arial,sans-serif}
-header{padding:22px 17px;background:#0b251b;border-bottom:1px solid var(--line)}
-.logo{font-size:27px;font-weight:800;color:var(--green)}
-header p{color:var(--muted);font-size:13px;margin-bottom:0}
-main{max-width:720px;margin:auto;padding:16px}
-h2{font-size:18px;margin-top:8px}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-.stat,.panel,.match{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:13px}
-.stat strong{display:block;color:var(--green);font-size:22px}
-.stat span{font-size:11px;color:var(--muted)}
-.panel{margin-top:16px}
-label{display:block;font-size:12px;color:var(--muted);margin:12px 0 5px}
-input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:#091f17;color:white;font-size:15px}
-button{padding:12px;border:0;border-radius:8px;background:var(--green);color:#062016;font-weight:700;font-size:14px;cursor:pointer}
-.primary{width:100%;margin-top:15px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.match{margin-top:10px}
-.match small{color:var(--muted)}
-.teams{font-size:17px;font-weight:700;margin:10px 0}
-.tag{display:inline-block;padding:5px 8px;border-radius:6px;background:#1b4634;color:var(--green);font-size:12px}
-.match p{font-size:13px;line-height:1.5}
-.actions{display:flex;gap:8px;margin-top:10px}
-.actions button{flex:1}
-.delete{background:#3c2929;color:#ffb4b4}
-.empty{color:var(--muted);font-size:13px;line-height:1.6}
-footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
+body{margin:0;background:radial-gradient(circle at top right,#12392b 0,transparent 35%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:26px 16px 18px;text-align:center;border-bottom:1px solid var(--line)}
+.logo{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:15px;background:var(--green);color:#062016;font-size:25px;font-weight:900;margin-bottom:8px}
+h1{margin:0;font-size:clamp(26px,6vw,38px);letter-spacing:.3px}header p{color:var(--muted);margin:5px auto 0;max-width:600px}
+main{width:min(100% - 24px,980px);margin:18px auto 44px;display:grid;gap:16px}
+.panel{background:rgba(16,40,32,.94);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 12px 35px #0002}
+h2{font-size:19px;margin:0 0 12px}h3{font-size:16px;margin:0 0 8px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}.field.full{grid-column:1/-1}
+label{font-size:13px;color:var(--muted)}
+input,select{width:100%;min-height:44px;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:#091f18;color:var(--text);font:inherit}
+button{border:0;border-radius:10px;padding:11px 13px;min-height:42px;font:inherit;font-weight:750;cursor:pointer}
+.primary{background:var(--green);color:#062016}.secondary{background:var(--panel2);border:1px solid var(--line);color:var(--text)}.danger{background:#482526;color:#ffe5e5;border:1px solid #7a3d3d}.success{background:#174a35;color:#d9ffeb;border:1px solid #287653}.warning{background:#4a3c1b;color:#fff0bd;border:1px solid #7b642a}
+.buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat{padding:13px;background:#0a2119;border:1px solid var(--line);border-radius:13px;min-width:0}
+.stat .label{font-size:12px;color:var(--muted)}.stat strong{display:block;font-size:25px;line-height:1.3;margin-top:4px;overflow-wrap:anywhere}
+.muted{color:var(--muted);font-size:13px}.filters{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.market-list{display:grid;gap:10px}.market-row{border:1px solid var(--line);background:#0a2119;border-radius:12px;padding:12px}
+.market-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.market-head strong{overflow-wrap:anywhere}.percent{color:var(--green);font-weight:850;white-space:nowrap}
+.track{height:7px;border-radius:99px;background:#243c32;margin-top:9px;overflow:hidden}.fill{height:100%;background:var(--green);border-radius:99px}
+.match-list{display:grid;gap:10px}.match{border:1px solid var(--line);background:#0a2119;border-radius:13px;padding:13px}
+.match-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.match small{color:var(--muted)}.teams{font-size:18px;font-weight:800;margin:8px 0;overflow-wrap:anywhere}.tag{display:inline-block;font-size:12px;background:#1a4031;border:1px solid #2c614a;border-radius:7px;padding:3px 7px;color:#d8f6e5}.status{font-size:13px;margin:9px 0;color:var(--muted)}.match-actions{display:flex;flex-wrap:wrap;gap:7px}.match-actions button{font-size:13px;padding:8px 10px;min-height:36px}
+.empty{padding:14px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);text-align:center}
+.note{font-size:12px;color:var(--muted);margin:12px 0 0}
+@media(min-width:680px){main{grid-template-columns:1fr 1fr}.wide{grid-column:1/-1}.stats{grid-template-columns:repeat(5,minmax(0,1fr))}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:380px){.grid,.filters{grid-template-columns:1fr}.field.full{grid-column:auto}.stat strong{font-size:22px}}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">⚽ AIprono</div>
-  <p>Les statistiques éclairent le jeu. Elles ne garantissent jamais le résultat.</p>
+  <div class="logo">A</div>
+  <h1>AIprono</h1>
+  <p>Enregistre tes pronostics, suis tes résultats et apprends de tes statistiques.</p>
 </header>
 <main>
-  <h2>📊 Mon tableau de bord</h2>
-  <div class="stats">
-    <div class="stats">
-  <div class="stat">
-    <strong id="total">0</strong>
-    <span>Matchs analysés</span>
-  </div>
-  <div class="stat">
-    <strong id="played">0</strong>
-    <span>Pronostics évalués</span>
-  </div>
-  <div class="stat">
-    <strong id="wins">0</strong>
-    <span>Réussis</span>
-  </div>
-  <div class="stat">
-    <strong id="losses">0</strong>
-    <span>Échoués</span>
-  </div>
-  <div class="stat">
-    <strong id="rate">—</strong>
-    <span>Taux de réussite</span>
-  </div>
-    </div>
-  </div>
-
   <section class="panel">
-    <h2>＋ Ajouter un match</h2>
+    <h2 id="formTitle">➕ Ajouter un pronostic</h2>
     <form id="matchForm">
-      <label for="league">Championnat</label>
-      <input id="league" placeholder="Ex. Ligue des champions" required>
       <div class="grid">
-        <div><label for="home">Équipe à domicile</label><input id="home" placeholder="Ex. Arsenal" required></div>
-        <div><label for="away">Équipe à l'extérieur</label><input id="away" placeholder="Ex. Lille" required></div>
+        <div class="field"><label for="league">Championnat</label><input id="league" placeholder="Ex. Premier League" required></div>
+        <div class="field"><label for="date">Date du match</label><input id="date" type="date" required></div>
+        <div class="field"><label for="home">Équipe à domicile</label><input id="home" placeholder="Ex. Arsenal" required></div>
+        <div class="field"><label for="away">Équipe à l'extérieur</label><input id="away" placeholder="Ex. Chelsea" required></div>
+        <div class="field"><label for="market">Type de pronostic</label>
+          <select id="market" required>
+            <option value="Victoire domicile">Victoire domicile</option>
+            <option value="Match nul">Match nul</option>
+            <option value="Victoire extérieur">Victoire extérieur</option>
+            <option value="Double chance">Double chance</option>
+            <option value="Plus de 1,5 buts">Plus de 1,5 buts</option>
+            <option value="Plus de 2,5 buts">Plus de 2,5 buts</option>
+            <option value="Moins de 2,5 buts">Moins de 2,5 buts</option>
+            <option value="Les deux équipes marquent">Les deux équipes marquent</option>
+            <option value="Score exact">Score exact</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
+        <div class="field"><label for="pick">Ton pronostic précis</label><input id="pick" placeholder="Ex. Arsenal gagne" required></div>
       </div>
-      <label for="date">Date du match</label>
-      <input id="date" type="date" required>
-      <label for="market">Marché étudié</label>
-      <select id="market">
-        <option>Plus de 1,5 but</option>
-        <option>Plus de 2,5 buts</option>
-        <option>Les deux équipes marquent</option>
-        <option>Victoire domicile</option>
-        <option>Match nul</option>
-        <option>Victoire extérieur</option>
-        <option>Double chance 1X</option>
-        <option>Double chance X2</option>
-      </select>
-      <label for="pick">Mon pronostic et mon analyse</label>
-      <textarea id="pick" rows="3" placeholder="Ex. Plus de 1,5 but — les deux équipes marquent souvent." required></textarea>
-      <button class="primary" type="submit">Enregistrer le match</button>
+      <div class="buttons">
+        <button class="primary" id="saveButton" type="submit">Enregistrer le pronostic</button>
+        <button class="secondary" id="cancelEdit" type="button" hidden>Annuler la modification</button>
+      </div>
     </form>
+    <p class="note">Les statistiques sont calculées à partir des matchs marqués « Réussi » ou « Échoué ». Les matchs en attente ne sont pas comptés dans le taux de réussite.</p>
   </section>
 
-  <h2>📋 Mes matchs</h2>
-  <div id="matches"><p class="empty">Aucun match pour le moment. Ajoute ton premier match ci-dessus.</p></div>
-  <p class="empty">Tes données sont enregistrées dans le navigateur de cet appareil. Elles ne sont pas partagées automatiquement avec les autres visiteurs.</p>
+  <section class="panel">
+    <h2>📊 Statistiques générales</h2>
+    <div class="stats">
+      <div class="stat"><span class="label">Pronostics</span><strong id="total">0</strong></div>
+      <div class="stat"><span class="label">Terminés</span><strong id="played">0</strong></div>
+      <div class="stat"><span class="label">Réussis</span><strong id="wins">0</strong></div>
+      <div class="stat"><span class="label">Échoués</span><strong id="losses">0</strong></div>
+      <div class="stat"><span class="label">Réussite</span><strong id="rate">—</strong></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>🎯 Performance par type de pronostic</h2>
+    <div id="marketStats" class="market-list"><p class="empty">Ajoute des pronostics et renseigne leurs résultats pour voir le bilan.</p></div>
+    <p class="note">Un marché avec peu de matchs peut afficher un taux élevé par hasard. Compare les résultats sur un échantillon suffisamment large.</p>
+  </section>
+
+  <section class="panel">
+    <h2>🔎 Recherche et filtres</h2>
+    <div class="filters">
+      <div class="field"><label for="search">Équipe ou pronostic</label><input id="search" placeholder="Rechercher…"></div>
+      <div class="field"><label for="leagueFilter">Championnat</label><select id="leagueFilter"><option value="">Tous les championnats</option></select></div>
+      <div class="field"><label for="fromDate">Depuis le</label><input id="fromDate" type="date"></div>
+      <div class="field"><label for="toDate">Jusqu'au</label><input id="toDate" type="date"></div>
+      <div class="field"><label for="resultFilter">Résultat</label><select id="resultFilter"><option value="">Tous les résultats</option><option value="En attente">En attente</option><option value="Réussi">Réussi</option><option value="Échoué">Échoué</option></select></div>
+      <div class="field"><label for="marketFilter">Marché</label><select id="marketFilter"><option value="">Tous les marchés</option></select></div>
+    </div>
+    <div class="buttons"><button class="secondary" id="clearFilters" type="button">Effacer les filtres</button></div>
+  </section>
+
+  <section class="panel wide">
+    <h2>🗂️ Historique des pronostics <span class="muted" id="visibleCount"></span></h2>
+    <div id="matches" class="match-list"><p class="empty">Aucun match pour le moment. Ajoute ton premier pronostic ci-dessus.</p></div>
+  </section>
+  <section class="panel wide">
+    <h2>💾 Sauvegarde de tes données</h2>
+    <p class="muted">Tes pronostics restent enregistrés dans le navigateur de cet appareil. Exporte régulièrement une copie pour éviter de les perdre. Le fichier d'export peut être réimporté plus tard.</p>
+    <div class="buttons">
+      <button class="secondary" id="exportBtn" type="button">Exporter mes données</button>
+      <button class="secondary" id="importBtn" type="button">Importer une sauvegarde</button>
+      <input id="importFile" type="file" accept=".json,application/json" hidden>
+    </div>
+  </section>
 </main>
-<footer>AIprono · Projet indépendant de statistiques football</footer>
 <script>
-const key="aipr ono_matches_v1".replace(" ","");
-let matches=[];
-try{matches=JSON.parse(localStorage.getItem(key)||"[]")}catch(e){matches=[]}
-const $=id=>document.getElementById(id);
-function save(){try{localStorage.setItem(key,JSON.stringify(matches))}catch(e){alert("Impossible de sauvegarder sur ce navigateur.")}render()}
-function render(){
- $("total").textContent=matches.length;
+const key = "aipr ono_matches_v1".replace(" ", "");
+let matches = [];
+let editingId = null;
+try {
+  const stored = JSON.parse(localStorage.getItem(key) || "[]");
+  matches = Array.isArray(stored) ? stored : [];
+} catch (e) { matches = []; }
 
-const done=matches.filter(m=>m.result==="Réussi"||m.result==="Échoué");
-const correct=done.filter(m=>m.result==="Réussi").length;
-const failed=done.filter(m=>m.result==="Échoué").length;
-
-$("played").textContent=done.length;
-$("wins").textContent=correct;
-$("losses").textContent=failed;
-$("rate").textContent=done.length
-  ?Math.round(correct/done.length*100)+"%"
-  :"—";
- const list=$("matches");
- if(!matches.length){list.innerHTML='<p class="empty">Aucun match pour le moment. Ajoute ton premier match ci-dessus.</p>';return}
- list.innerHTML="";
- matches.slice().reverse().forEach(m=>{
-  const card=document.createElement("article");card.className="match";
-  const small=document.createElement("small");small.textContent=m.league+" · "+m.date;
-  const teams=document.createElement("div");teams.className="teams";teams.textContent=m.home+" — "+m.away;
-  const tag=document.createElement("span");tag.className="tag";tag.textContent=m.market;
-  const note=document.createElement("p");note.textContent=m.pick;
-  const status=document.createElement("p");status.textContent="Statut : "+(m.result||"En attente");
-  const actions=document.createElement("div");actions.className="actions";
-  const ok=document.createElement("button");ok.textContent="Réussi";
-  ok.onclick=()=>{m.result="Réussi";save()};
-  const no=document.createElement("button");no.textContent="Échoué";no.className="delete";
-  no.onclick=()=>{m.result="Échoué";save()};
-  const del=document.createElement("button");del.textContent="Supprimer";del.className="delete";
-  del.onclick=()=>{if(confirm("Supprimer ce match ?")){matches=matches.filter(x=>x.id!==m.id);save()}};
-  actions.append(ok,no,del);card.append(small,teams,tag,note,status,actions);list.append(card);
- });
+const $ = id => document.getElementById(id);
+const knownMarkets = [
+  "Victoire domicile","Match nul","Victoire extérieur","Double chance",
+  "Plus de 1,5 buts","Plus de 2,5 buts","Moins de 2,5 buts",
+  "Les deux équipes marquent","Score exact","Autre"
+];
+function save() {
+  try { localStorage.setItem(key, JSON.stringify(matches)); }
+  catch(e) { alert("Impossible de sauvegarder dans ce navigateur. Exporte tes données si possible."); }
+  render();
 }
-$("matchForm").addEventListener("submit",e=>{
- e.preventDefault();
- matches.push({id:Date.now(),league:$("league").value.trim(),home:$("home").value.trim(),away:$("away").value.trim(),date:$("date").value,market:$("market").value,pick:$("pick").value.trim(),result:""});
- save();e.target.reset();
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+function doneMatches(list) {
+  return list.filter(m => m.result === "Réussi" || m.result === "Échoué");
+}
+function fillSelect(id, values, firstLabel) {
+  const select = $(id);
+  const previous = select.value;
+  select.innerHTML = "";
+  const first = document.createElement("option");
+  first.value = ""; first.textContent = firstLabel; select.append(first);
+  [...new Set(values.filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr")).forEach(value => {
+    const opt = document.createElement("option"); opt.value = value; opt.textContent = value; select.append(opt);
+  });
+  if ([...select.options].some(o => o.value === previous)) select.value = previous;
+}
+function getFilteredMatches() {
+  const q = $("search").value.trim().toLocaleLowerCase("fr");
+  const league = $("leagueFilter").value;
+  const market = $("marketFilter").value;
+  const result = $("resultFilter").value;
+  const from = $("fromDate").value;
+  const to = $("toDate").value;
+  return matches.filter(m => {
+    const haystack = [m.home,m.away,m.pick,m.league,m.market].join(" ").toLocaleLowerCase("fr");
+    const status = m.result || "En attente";
+    return (!q || haystack.includes(q)) &&
+      (!league || m.league === league) &&
+      (!market || m.market === market) &&
+      (!result || status === result) &&
+      (!from || !m.date || m.date >= from) &&
+      (!to || !m.date || m.date <= to);
+  });
+}
+function renderMarketStats() {
+  const finished = doneMatches(matches);
+  const markets = [...new Set(matches.map(m => m.market || "Autre"))].sort((a,b)=>a.localeCompare(b,"fr"));
+  const container = $("marketStats");
+  if (!markets.length) {
+    container.innerHTML = '<p class="empty">Ajoute des pronostics pour commencer le suivi par marché.</p>';
+    return;
+  }
+  container.innerHTML = "";
+  markets.forEach(market => {
+    const items = finished.filter(m => (m.market || "Autre") === market);
+    const wins = items.filter(m => m.result === "Réussi").length;
+    const losses = items.filter(m => m.result === "Échoué").length;
+    const rate = items.length ? Math.round(wins / items.length * 100) : null;
+    const row = document.createElement("div"); row.className = "market-row";
+    const head = document.createElement("div"); head.className = "market-head";
+    const title = document.createElement("strong"); title.textContent = market;
+    const percent = document.createElement("span"); percent.className = "percent"; percent.textContent = rate === null ? "En attente" : rate + "%";
+    head.append(title, percent);
+    const detail = document.createElement("div"); detail.className = "muted";
+    detail.textContent = items.length ? `${wins} réussi(s) · ${losses} échoué(s) · ${items.length} terminé(s)` : "Aucun résultat terminé pour ce marché";
+    row.append(head, detail);
+    if (rate !== null) {
+      const track = document.createElement("div"); track.className = "track";
+      const fill = document.createElement("div"); fill.className = "fill"; fill.style.width = rate + "%";
+      track.append(fill); row.append(track);
+    }
+    container.append(row);
+  });
+}
+function render() {
+  $("total").textContent = matches.length;
+  const done = doneMatches(matches);
+  const wins = done.filter(m => m.result === "Réussi").length;
+  const losses = done.filter(m => m.result === "Échoué").length;
+  $("played").textContent = done.length;
+  $("wins").textContent = wins;
+  $("losses").textContent = losses;
+  $("rate").textContent = done.length ? Math.round(wins / done.length * 100) + "%" : "—";
+
+  fillSelect("leagueFilter", matches.map(m => m.league), "Tous les championnats");
+  fillSelect("marketFilter", matches.map(m => m.market), "Tous les marchés");
+  renderMarketStats();
+
+  const filtered = getFilteredMatches().slice().sort((a,b) => String(b.date || "").localeCompare(String(a.date || "")) || (b.id || 0) - (a.id || 0));
+  $("visibleCount").textContent = `(${filtered.length})`;
+  const list = $("matches");
+  if (!filtered.length) {
+    list.innerHTML = '<p class="empty">Aucun pronostic ne correspond aux filtres sélectionnés.</p>';
+    return;
+  }
+  list.innerHTML = "";
+  filtered.forEach(m => {
+    const card = document.createElement("article"); card.className = "match";
+    const top = document.createElement("div"); top.className = "match-top";
+    const meta = document.createElement("small"); meta.textContent = `${m.league || "Championnat non précisé"} · ${m.date || "Date non précisée"}`;
+    const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = m.market || "Autre";
+    top.append(meta, tag);
+    const teams = document.createElement("div"); teams.className = "teams"; teams.textContent = `${m.home || "Équipe domicile"} — ${m.away || "Équipe extérieur"}`;
+    const pick = document.createElement("div"); pick.textContent = "Pronostic : " + (m.pick || "—");
+    const status = document.createElement("p"); status.className = "status"; status.textContent = "Résultat : " + (m.result || "En attente");
+    if (m.result === "Réussi") status.style.color = "var(--green)";
+    if (m.result === "Échoué") status.style.color = "var(--red)";
+    const actions = document.createElement("div"); actions.className = "match-actions";
+    const ok = document.createElement("button"); ok.className = "success"; ok.textContent = "Réussi"; ok.onclick = () => { m.result = "Réussi"; save(); };
+    const no = document.createElement("button"); no.className = "danger"; no.textContent = "Échoué"; no.onclick = () => { m.result = "Échoué"; save(); };
+    const pending = document.createElement("button"); pending.className = "warning"; pending.textContent = "En attente"; pending.onclick = () => { m.result = ""; save(); };
+    const edit = document.createElement("button"); edit.className = "secondary"; edit.textContent = "Modifier"; edit.onclick = () => startEdit(m.id);
+    const del = document.createElement("button"); del.className = "danger"; del.textContent = "Supprimer"; del.onclick = () => { if (confirm("Supprimer ce pronostic ?")) { matches = matches.filter(x => x.id !== m.id); if (editingId === m.id) cancelEdit(); save(); } };
+    actions.append(ok,no,pending,edit,del);
+    card.append(top,teams,pick,status,actions); list.append(card);
+  });
+}
+function startEdit(id) {
+  const m = matches.find(x => x.id === id); if (!m) return;
+  editingId = id;
+  $("league").value = m.league || ""; $("date").value = m.date || "";
+  $("home").value = m.home || ""; $("away").value = m.away || "";
+  $("market").value = knownMarkets.includes(m.market) ? m.market : "Autre";
+  $("pick").value = m.pick || "";
+  $("formTitle").textContent = "✏️ Modifier le pronostic";
+  $("saveButton").textContent = "Enregistrer les modifications";
+  $("cancelEdit").hidden = false;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function cancelEdit() {
+  editingId = null; $("matchForm").reset();
+  $("formTitle").textContent = "➕ Ajouter un pronostic";
+  $("saveButton").textContent = "Enregistrer le pronostic";
+  $("cancelEdit").hidden = true;
+}
+$("matchForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const data = {league:$("league").value.trim(), home:$("home").value.trim(), away:$("away").value.trim(), date:$("date").value, market:$("market").value, pick:$("pick").value.trim()};
+  if (editingId !== null) {
+    const m = matches.find(x => x.id === editingId);
+    if (m) Object.assign(m, data);
+    cancelEdit();
+  } else {
+    matches.push({id:Date.now(), ...data, result:""});
+    e.target.reset();
+  }
+  save();
+});
+$("cancelEdit").addEventListener("click", cancelEdit);
+["search","leagueFilter","fromDate","toDate","resultFilter","marketFilter"].forEach(id => {
+  $(id).addEventListener(id === "search" ? "input" : "change", render);
+});
+$("clearFilters").addEventListener("click", () => {
+  ["search","leagueFilter","fromDate","toDate","resultFilter","marketFilter"].forEach(id => $(id).value = "");
+  render();
+});
+$("exportBtn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify({app:"AIprono",version:2,exportedAt:new Date().toISOString(),matches},null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = "aipr ono-sauvegarde.json".replace(" ",""); a.click();
+  URL.revokeObjectURL(url);
+});
+$("importBtn").addEventListener("click", () => $("importFile").click());
+$("importFile").addEventListener("change", async e => {
+  const file = e.target.files[0]; if (!file) return;
+  try {
+    const parsed = JSON.parse(await file.text());
+    const incoming = Array.isArray(parsed) ? parsed : parsed.matches;
+    if (!Array.isArray(incoming)) throw new Error("format");
+    if (!confirm(`Importer ${incoming.length} pronostic(s) ? Ils seront ajoutés à ceux déjà enregistrés.`)) { e.target.value = ""; return; }
+    const existingIds = new Set(matches.map(m => String(m.id)));
+    const imported = incoming.map((m,i) => ({...m,id: m.id ?? (Date.now()+i), result:["Réussi","Échoué"].includes(m.result) ? m.result : ""}));
+    matches = matches.concat(imported.filter(m => !existingIds.has(String(m.id))));
+    save(); alert("Importation terminée. Vérifie tes pronostics.");
+  } catch(err) { alert("Fichier invalide. Choisis une sauvegarde JSON créée par AIprono."); }
+  e.target.value = "";
 });
 render();
 </script>
