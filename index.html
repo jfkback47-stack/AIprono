@@ -46,6 +46,7 @@ button{border:0;border-radius:10px;padding:11px 13px;min-height:42px;font:inheri
 <main>
   <section class="panel">
     <h2 id="formTitle">➕ Ajouter un pronostic</h2>
+    <p class="note" id="storageStatus" role="status" aria-live="polite">Vérification de la sauvegarde…</p>
     <form id="matchForm">
       <div class="grid">
         <div class="field"><label for="league">Championnat</label><input id="league" placeholder="Ex. Premier League" required></div>
@@ -147,7 +148,10 @@ let editingId = null;
 try {
   const stored = JSON.parse(localStorage.getItem(key) || "[]");
   matches = Array.isArray(stored) ? stored : [];
-} catch (e) { matches = []; }
+} catch (e) {
+  matches = [];
+  window.addEventListener("DOMContentLoaded", () => setStorageStatus("⚠️ Impossible de lire les données enregistrées dans ce navigateur. Ne vide pas le cache ni les données du site.", true), { once: true });
+}
 
 const $ = id => document.getElementById(id);
 const knownMarkets = [
@@ -155,10 +159,28 @@ const knownMarkets = [
   "Plus de 1,5 buts","Plus de 2,5 buts","Moins de 2,5 buts",
   "Les deux équipes marquent","Score exact","Autre"
 ];
+function setStorageStatus(message, isError = false) {
+  const status = document.getElementById("storageStatus");
+  if (!status) return;
+  status.textContent = message;
+  status.style.color = isError ? "#b91c1c" : "var(--green)";
+}
 function save() {
-  try { localStorage.setItem(key, JSON.stringify(matches)); }
-  catch(e) { alert("Impossible de sauvegarder dans ce navigateur. Exporte tes données si possible."); }
-  render();
+  try {
+    localStorage.setItem(key, JSON.stringify(matches));
+    const check = JSON.parse(localStorage.getItem(key) || "null");
+    if (!Array.isArray(check) || check.length !== matches.length) {
+      throw new Error("La vérification de sauvegarde a échoué.");
+    }
+    setStorageStatus("✓ Sauvegarde locale confirmée sur ce navigateur.");
+  } catch(e) {
+    setStorageStatus("⚠️ La sauvegarde a échoué : " + (e && e.message ? e.message : "stockage indisponible") + ". Vérifie les paramètres du navigateur et exporte tes données si possible.", true);
+    alert("AIprono n'a pas pu confirmer la sauvegarde. N'efface pas les données du navigateur et exporte une sauvegarde dès que possible.");
+  }
+  try { render(); }
+  catch(e) {
+    setStorageStatus("Les données ont peut-être été sauvegardées, mais l'affichage a rencontré une erreur : " + (e && e.message ? e.message : "erreur inconnue"), true);
+  }
 }
 function esc(value) {
   return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -263,30 +285,4 @@ function render() {
     const no = document.createElement("button"); no.className = "danger"; no.textContent = "Échoué"; no.onclick = () => { m.result = "Échoué"; save(); };
     const pending = document.createElement("button"); pending.className = "warning"; pending.textContent = "En attente"; pending.onclick = () => { m.result = ""; save(); };
     const edit = document.createElement("button"); edit.className = "secondary"; edit.textContent = "Modifier"; edit.onclick = () => startEdit(m.id);
-    const del = document.createElement("button"); del.className = "danger"; del.textContent = "Supprimer"; del.onclick = () => { if (confirm("Supprimer ce pronostic ?")) { matches = matches.filter(x => x.id !== m.id); if (editingId === m.id) cancelEdit(); save(); } };
-    actions.append(ok,no,pending,edit,del);
-    card.append(top,teams,pick,status,actions); list.append(card);
-  });
-}
-function startEdit(id) {
-  const m = matches.find(x => x.id === id); if (!m) return;
-  editingId = id;
-  $("league").value = m.league || ""; $("date").value = m.date || "";
-  $("home").value = m.home || ""; $("away").value = m.away || "";
-  $("market").value = knownMarkets.includes(m.market) ? m.market : "Autre";
-  $("pick").value = m.pick || "";
-  $("formTitle").textContent = "✏️ Modifier le pronostic";
-  $("saveButton").textContent = "Enregistrer les modifications";
-  $("cancelEdit").hidden = false;
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-function cancelEdit() {
-  editingId = null; $("matchForm").reset();
-  $("formTitle").textContent = "➕ Ajouter un pronostic";
-  $("saveButton").textContent = "Enregistrer le pronostic";
-  $("cancelEdit").hidden = true;
-}
-$("matchForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const data = {league:$("league").value.trim(), home:$("home").value.trim(), away:$("away").value.trim(), date:$("date").value, market:$("market").value, pick:$("pick").value.trim()};
-  if (editin
+    const del = document.createElement("button"); del.className = "danger"; del.textContent = "Supprimer"; del.onclick = () => { if (confirm("Supprimer ce
