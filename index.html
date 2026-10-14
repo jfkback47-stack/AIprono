@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#071c16">
+<title>AIprono — Football & Statistiques</title>
+<style>
+:root{--bg:#071c16;--panel:#102820;--green:#35dc91;--muted:#9bb7aa;--line:#284438}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#f4fff8;font-family:Arial,sans-serif}
+header{padding:22px 17px;background:#0b251b;border-bottom:1px solid var(--line)}
+.logo{font-size:27px;font-weight:800;color:var(--green)}
+header p{color:var(--muted);font-size:13px;margin-bottom:0}
+main{max-width:720px;margin:auto;padding:16px}
+h2{font-size:18px;margin-top:8px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.stat,.panel,.match{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:13px}
+.stat strong{display:block;color:var(--green);font-size:22px}
+.stat span{font-size:11px;color:var(--muted)}
+.panel{margin-top:16px}
+label{display:block;font-size:12px;color:var(--muted);margin:12px 0 5px}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:#091f17;color:white;font-size:15px}
+button{padding:12px;border:0;border-radius:8px;background:var(--green);color:#062016;font-weight:700;font-size:14px;cursor:pointer}
+.primary{width:100%;margin-top:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.match{margin-top:10px}
+.match small{color:var(--muted)}
+.teams{font-size:17px;font-weight:700;margin:10px 0}
+.tag{display:inline-block;padding:5px 8px;border-radius:6px;background:#1b4634;color:var(--green);font-size:12px}
+.match p{font-size:13px;line-height:1.5}
+.actions{display:flex;gap:8px;margin-top:10px}
+.actions button{flex:1}
+.delete{background:#3c2929;color:#ffb4b4}
+.empty{color:var(--muted);font-size:13px;line-height:1.6}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">⚽ AIprono</div>
+  <p>Les statistiques éclairent le jeu. Elles ne garantissent jamais le résultat.</p>
+</header>
+<main>
+  <h2>📊 Mon tableau de bord</h2>
+  <div class="stats">
+    <div class="stat"><strong id="total">0</strong><span>Matchs ajoutés</span></div>
+    <div class="stat"><strong id="played">0</strong><span>Résultats saisis</span></div>
+    <div class="stat"><strong id="rate">—</strong><span>Pronostics réussis</span></div>
+  </div>
+
+  <section class="panel">
+    <h2>＋ Ajouter un match</h2>
+    <form id="matchForm">
+      <label for="league">Championnat</label>
+      <input id="league" placeholder="Ex. Ligue des champions" required>
+      <div class="grid">
+        <div><label for="home">Équipe à domicile</label><input id="home" placeholder="Ex. Arsenal" required></div>
+        <div><label for="away">Équipe à l'extérieur</label><input id="away" placeholder="Ex. Lille" required></div>
+      </div>
+      <label for="date">Date du match</label>
+      <input id="date" type="date" required>
+      <label for="market">Marché étudié</label>
+      <select id="market">
+        <option>Plus de 1,5 but</option>
+        <option>Plus de 2,5 buts</option>
+        <option>Les deux équipes marquent</option>
+        <option>Victoire domicile</option>
+        <option>Match nul</option>
+        <option>Victoire extérieur</option>
+        <option>Double chance 1X</option>
+        <option>Double chance X2</option>
+      </select>
+      <label for="pick">Mon pronostic et mon analyse</label>
+      <textarea id="pick" rows="3" placeholder="Ex. Plus de 1,5 but — les deux équipes marquent souvent." required></textarea>
+      <button class="primary" type="submit">Enregistrer le match</button>
+    </form>
+  </section>
+
+  <h2>📋 Mes matchs</h2>
+  <div id="matches"><p class="empty">Aucun match pour le moment. Ajoute ton premier match ci-dessus.</p></div>
+  <p class="empty">Tes données sont enregistrées dans le navigateur de cet appareil. Elles ne sont pas partagées automatiquement avec les autres visiteurs.</p>
+</main>
+<footer>AIprono · Projet indépendant de statistiques football</footer>
+<script>
+const key="aipr ono_matches_v1".replace(" ","");
+let matches=[];
+try{matches=JSON.parse(localStorage.getItem(key)||"[]")}catch(e){matches=[]}
+const $=id=>document.getElementById(id);
+function save(){try{localStorage.setItem(key,JSON.stringify(matches))}catch(e){alert("Impossible de sauvegarder sur ce navigateur.")}render()}
+function render(){
+ $("total").textContent=matches.length;
+ const done=matches.filter(m=>m.result);
+ $("played").textContent=done.length;
+ const correct=done.filter(m=>m.result==="Réussi").length;
+ $("rate").textContent=done.length?Math.round(correct/done.length*100)+"%":"—";
+ const list=$("matches");
+ if(!matches.length){list.innerHTML='<p class="empty">Aucun match pour le moment. Ajoute ton premier match ci-dessus.</p>';return}
+ list.innerHTML="";
+ matches.slice().reverse().forEach(m=>{
+  const card=document.createElement("article");card.className="match";
+  const small=document.createElement("small");small.textContent=m.league+" · "+m.date;
+  const teams=document.createElement("div");teams.className="teams";teams.textContent=m.home+" — "+m.away;
+  const tag=document.createElement("span");tag.className="tag";tag.textContent=m.market;
+  const note=document.createElement("p");note.textContent=m.pick;
+  const status=document.createElement("p");status.textContent="Statut : "+(m.result||"En attente");
+  const actions=document.createElement("div");actions.className="actions";
+  const ok=document.createElement("button");ok.textContent="Réussi";
+  ok.onclick=()=>{m.result="Réussi";save()};
+  const no=document.createElement("button");no.textContent="Échoué";no.className="delete";
+  no.onclick=()=>{m.result="Échoué";save()};
+  const del=document.createElement("button");del.textContent="Supprimer";del.className="delete";
+  del.onclick=()=>{if(confirm("Supprimer ce match ?")){matches=matches.filter(x=>x.id!==m.id);save()}};
+  actions.append(ok,no,del);card.append(small,teams,tag,note,status,actions);list.append(card);
+ });
+}
+$("matchForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ matches.push({id:Date.now(),league:$("league").value.trim(),home:$("home").value.trim(),away:$("away").value.trim(),date:$("date").value,market:$("market").value,pick:$("pick").value.trim(),result:""});
+ save();e.target.reset();
+});
+render();
+</script>
+</body>
+</html>
