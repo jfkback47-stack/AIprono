@@ -41,7 +41,7 @@ button{border:0;border-radius:10px;padding:11px 13px;min-height:42px;font:inheri
 <header>
   <div class="logo">A</div>
   <h1>AIprono</h1>
-  <p>Enregistre tes pronostics, suis tes résultats et apprends de tes statistiques.</p>
+  <p>Enregistre tes pronostics, analyse les statistiques manuellement et suis tes résultats.</p>
 </header>
 <main>
   <section class="panel">
@@ -104,6 +104,26 @@ button{border:0;border-radius:10px;padding:11px 13px;min-height:42px;font:inheri
       <div class="field"><label for="marketFilter">Marché</label><select id="marketFilter"><option value="">Tous les marchés</option></select></div>
     </div>
     <div class="buttons"><button class="secondary" id="clearFilters" type="button">Effacer les filtres</button></div>
+  </section>
+
+  <section class="panel wide" id="analysisPanel">
+    <h2>🧠 Analyse manuelle d’un match</h2>
+    <p class="muted">Renseigne les 5 derniers résultats et les moyennes de buts de chaque équipe. Utilise les mêmes sources pour les deux équipes. Les résultats sont des indicateurs simples, pas des probabilités garanties.</p>
+    <form id="analysisForm">
+      <div class="grid">
+        <div class="field"><label for="aHome">Équipe à domicile</label><input id="aHome" placeholder="Ex. Arsenal" required></div>
+        <div class="field"><label for="aAway">Équipe à l’extérieur</label><input id="aAway" placeholder="Ex. Chelsea" required></div>
+        <div class="field"><label for="homeForm">5 derniers résultats domicile (V/N/D)</label><input id="homeForm" placeholder="Ex. V,V,N,D,V" required><span class="muted">V = victoire, N = nul, D = défaite</span></div>
+        <div class="field"><label for="awayForm">5 derniers résultats extérieur (V/N/D)</label><input id="awayForm" placeholder="Ex. D,N,V,D,V" required><span class="muted">Saisis les 5 derniers matchs de l’équipe</span></div>
+        <div class="field"><label for="homeScored">Buts marqués / match — domicile</label><input id="homeScored" type="number" min="0" max="10" step="0.1" placeholder="Ex. 1.8" required></div>
+        <div class="field"><label for="homeConceded">Buts encaissés / match — domicile</label><input id="homeConceded" type="number" min="0" max="10" step="0.1" placeholder="Ex. 0.9" required></div>
+        <div class="field"><label for="awayScored">Buts marqués / match — extérieur</label><input id="awayScored" type="number" min="0" max="10" step="0.1" placeholder="Ex. 1.2" required></div>
+        <div class="field"><label for="awayConceded">Buts encaissés / match — extérieur</label><input id="awayConceded" type="number" min="0" max="10" step="0.1" placeholder="Ex. 1.5" required></div>
+      </div>
+      <div class="buttons"><button class="primary" type="submit">Analyser le match</button><button class="secondary" id="clearAnalysis" type="button">Effacer</button></div>
+    </form>
+    <div id="analysisResult" class="market-list" aria-live="polite" style="margin-top:14px"><p class="empty">Le résultat de l’analyse apparaîtra ici.</p></div>
+    <p class="note">Conseil : note la source et la période des statistiques dans tes propres notes. Une équipe peut avoir de bons chiffres contre des adversaires faibles ; regarde aussi les absences, la motivation et le calendrier.</p>
   </section>
 
   <section class="panel wide">
@@ -270,45 +290,4 @@ $("matchForm").addEventListener("submit", e => {
   e.preventDefault();
   const data = {league:$("league").value.trim(), home:$("home").value.trim(), away:$("away").value.trim(), date:$("date").value, market:$("market").value, pick:$("pick").value.trim()};
   if (editingId !== null) {
-    const m = matches.find(x => x.id === editingId);
-    if (m) Object.assign(m, data);
-    cancelEdit();
-  } else {
-    matches.push({id:Date.now(), ...data, result:""});
-    e.target.reset();
-  }
-  save();
-});
-$("cancelEdit").addEventListener("click", cancelEdit);
-["search","leagueFilter","fromDate","toDate","resultFilter","marketFilter"].forEach(id => {
-  $(id).addEventListener(id === "search" ? "input" : "change", render);
-});
-$("clearFilters").addEventListener("click", () => {
-  ["search","leagueFilter","fromDate","toDate","resultFilter","marketFilter"].forEach(id => $(id).value = "");
-  render();
-});
-$("exportBtn").addEventListener("click", () => {
-  const blob = new Blob([JSON.stringify({app:"AIprono",version:2,exportedAt:new Date().toISOString(),matches},null,2)], {type:"application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a"); a.href = url; a.download = "aipr ono-sauvegarde.json".replace(" ",""); a.click();
-  URL.revokeObjectURL(url);
-});
-$("importBtn").addEventListener("click", () => $("importFile").click());
-$("importFile").addEventListener("change", async e => {
-  const file = e.target.files[0]; if (!file) return;
-  try {
-    const parsed = JSON.parse(await file.text());
-    const incoming = Array.isArray(parsed) ? parsed : parsed.matches;
-    if (!Array.isArray(incoming)) throw new Error("format");
-    if (!confirm(`Importer ${incoming.length} pronostic(s) ? Ils seront ajoutés à ceux déjà enregistrés.`)) { e.target.value = ""; return; }
-    const existingIds = new Set(matches.map(m => String(m.id)));
-    const imported = incoming.map((m,i) => ({...m,id: m.id ?? (Date.now()+i), result:["Réussi","Échoué"].includes(m.result) ? m.result : ""}));
-    matches = matches.concat(imported.filter(m => !existingIds.has(String(m.id))));
-    save(); alert("Importation terminée. Vérifie tes pronostics.");
-  } catch(err) { alert("Fichier invalide. Choisis une sauvegarde JSON créée par AIprono."); }
-  e.target.value = "";
-});
-render();
-</script>
-</body>
-</html>
+    const m = matches.fi
