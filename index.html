@@ -109,7 +109,7 @@ button{border:0;border-radius:10px;padding:11px 13px;min-height:42px;font:inheri
   <section class="panel wide" id="analysisPanel">
     <h2>🧠 Analyse manuelle d’un match</h2>
     <p class="muted">Renseigne les 5 derniers résultats et les moyennes de buts de chaque équipe. Utilise les mêmes sources pour les deux équipes. Les résultats sont des indicateurs simples, pas des probabilités garanties.</p>
-    <form id="analysisForm">
+    <form id="analysisForm" novalidate>
       <div class="grid">
         <div class="field"><label for="aHome">Équipe à domicile</label><input id="aHome" placeholder="Ex. Arsenal" required></div>
         <div class="field"><label for="aAway">Équipe à l’extérieur</label><input id="aAway" placeholder="Ex. Chelsea" required></div>
@@ -120,7 +120,7 @@ button{border:0;border-radius:10px;padding:11px 13px;min-height:42px;font:inheri
         <div class="field"><label for="awayScored">Buts marqués / match — extérieur</label><input id="awayScored" type="number" min="0" max="10" step="0.1" placeholder="Ex. 1.2" required></div>
         <div class="field"><label for="awayConceded">Buts encaissés / match — extérieur</label><input id="awayConceded" type="number" min="0" max="10" step="0.1" placeholder="Ex. 1.5" required></div>
       </div>
-      <div class="buttons"><button class="primary" type="submit">Analyser le match</button><button class="secondary" id="clearAnalysis" type="button">Effacer</button></div>
+      <div class="buttons"><button class="primary" type="button" onclick="runMatchAnalysis()">Analyser le match</button><button class="secondary" id="clearAnalysis" type="button">Effacer</button></div>
     </form>
     <div id="analysisResult" class="market-list" aria-live="polite" style="margin-top:14px"><p class="empty">Le résultat de l’analyse apparaîtra ici.</p></div>
     <p class="note">Conseil : note la source et la période des statistiques dans tes propres notes. Une équipe peut avoir de bons chiffres contre des adversaires faibles ; regarde aussi les absences, la motivation et le calendrier.</p>
@@ -289,5 +289,4 @@ function cancelEdit() {
 $("matchForm").addEventListener("submit", e => {
   e.preventDefault();
   const data = {league:$("league").value.trim(), home:$("home").value.trim(), away:$("away").value.trim(), date:$("date").value, market:$("market").value, pick:$("pick").value.trim()};
-  if (editingId !== null) {
-    const m = matches.fi
+  if (editin
